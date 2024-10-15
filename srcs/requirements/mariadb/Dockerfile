@@ -1,6 +1,11 @@
 # Determines the OS image to build upon
 FROM alpine:3.16
 
+# Environment variables to be imported from .env and used inside the container
+ARG DB_NAME \
+    DB_USER \
+    DB_PASS
+
 # Installs MariaDB and MariaDB-client without saving the sources in cache
 # The client allows you to interact with a MariaDB database server and
 # provides a CLI that can execute SQL statements
@@ -32,11 +37,11 @@ EXPOSE 3306
 # Sets the default user within the container to "mysql"
 USER mysql
 
-# Copies the file "db.sh" from the host to the container
-COPY tools/db.sh .
+# Copies the file "create_db.sh" from the host to the container
+COPY requirements/mariadb/conf/create_db.sh
 
 # Defines the executable and the parameters to be run when the container starts
-ENTRYPOINT ["sh", "db.sh"]
+ENTRYPOINT ["sh", "create_db.sh"]
 
 # Specifies the default command to be executed if no arguments are provided when
 # running the container. It starts the MySQL server process and skips the log errors
