@@ -2,6 +2,8 @@
 FROM alpine:3.16
 
 # Environment variables to be imported from .env and used inside the container
+# ARG is used when the variables will be used when building the image, but not after it starts
+# ENV is used to pass variables that will stay in the environment of the already built image
 ARG DB_NAME \
     DB_USER \
     DB_PASS
