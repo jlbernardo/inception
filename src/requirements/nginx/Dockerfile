@@ -1,5 +1,5 @@
 # Determines the OS image to build upon
-FROM	alpine:3.20
+FROM alpine:3.20
 
 # Installs Nginx without saving the sources in cache
 RUN	apk update && apk upgrade && apk add --no-cache nginx

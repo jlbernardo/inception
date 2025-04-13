@@ -2,7 +2,7 @@
 
 # Checks if the directory doesn't exist
 if [ ! -d "/var/lib/mysql/mysql" ]; then
-	
+
 	# Recursively changes the ownership of the directory and its contents
 	# to the mysql user and group, ensuring MySQL service can access and
 	# modify the database files
@@ -20,9 +20,11 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	fi
 fi
 
+echo "db_name: ${DB_NAME}"
+
 # Checks if the directory doesn't exists
-if [ ! -d "/var/lib/mysql/wordpress"]; then
-	
+if [ ! -d "/var/lib/mysql/wordpress" ]; then
+
 	# Creates a temporary SQL script
 	cat << EOF > /tmp/create_db.sql
 # Uses "mysql" database
@@ -31,11 +33,10 @@ USE mysql;
 # Flushes privileges to ensure changes take effect
 FLUSH PRIVILEGES;
 
+DROP DATABASE test;
+
 # Deletes users with empty usernames
 DELETE FROM mysql.user WHERE User='';
-
-# Drops the test database, if it exists
-DROP DATABASE test;
 
 # Deletes entries related to the test database from "mysql.db" table
 DELETE FROM mysql.db WHERE Db='test';
@@ -47,13 +48,15 @@ DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT}';
 
 # Creates a database with UTF-8 character set and collation
+# Collations in SQL Server provide sorting rules, case, and
+# accent sensitivity properties for the data.
 CREATE DATABASE ${DB_NAME} CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 # Creates a user with specified password
 CREATE USER '${DB_USER}'@'%' IDENTIFIED by '${DB_PASS}';
 
 # Grants all privileges on the wordpress database to the created user
-GRANT ALL PRIVILEGES ON wordpress.* TO '${DB_USER}'@'%';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
 
 # Flushes privileges again
 FLUSH PRIVILEGES;

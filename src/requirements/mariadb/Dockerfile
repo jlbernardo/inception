@@ -1,12 +1,12 @@
 # Determines the OS image to build upon
-FROM alpine:3.16
+FROM alpine:3.20
 
 # Environment variables to be imported from .env and used inside the container
 # ARG is used when the variables will be used when building the image, but not after it starts
 # ENV is used to pass variables that will stay in the environment of the already built image
-ARG DB_NAME \
-    DB_USER \
-    DB_PASS
+ARG DB_NAME
+ARG DB_USER
+ARG DB_PASS
 
 # Installs MariaDB and MariaDB-client without saving the sources in cache
 # The client allows you to interact with a MariaDB database server and
@@ -40,11 +40,14 @@ EXPOSE 3306
 USER mysql
 
 # Copies the file "create_db.sh" from the host to the container
-COPY requirements/mariadb/conf/create_db.sh
+COPY requirements/mariadb/conf/create_db.sh .
+
+RUN chmod +x create_db.sh; ash -f create_db.sh
 
 # Defines the executable and the parameters to be run when the container starts
-ENTRYPOINT ["sh", "create_db.sh"]
+#ENTRYPOINT ["sh", "create_db.sh"]
 
 # Specifies the default command to be executed if no arguments are provided when
 # running the container. It starts the MySQL server process and skips the log errors
-CMD ["/usr/bin/mysqld", "--skip-log-error"]
+ENTRYPOINT ["mariadbd-safe"]
+#ENTRYPOINT ["sleep", "infinity"]
