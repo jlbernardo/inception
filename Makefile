@@ -32,13 +32,17 @@ down:
 	@sudo docker-compose -f ./srcs/docker-compose.yml down
 
 show:
-	@echo "$(GRN)"
-	@echo "CONTAINERS AFTER CLEANUP $(DFL)"
+	@echo "$(BLU)"
+	@echo " *~ CONTAINERS$(DFL)"
 	@sudo docker-compose -f ./srcs/docker-compose.yml ps
-	@echo "$(GRN)"
-	@echo "IMAGES AFTER CLEANUP"
+	@echo "$(BLU)"
+	@echo " *~ IMAGES$(DFL)"
 	@sudo docker-compose -f ./srcs/docker-compose.yml images
-	@echo "$(DFL)"
+
+volumes:
+	@echo "$(BLU)"
+	@echo " *~ VOLUMES$(DFL)"
+	@sudo docker volume inspect db-volume wp-volume
 
 clean:
 	@echo "$(BLU)"

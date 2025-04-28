@@ -1,10 +1,5 @@
 #!/bin/ash
 
-# Sleep added so these configs only run after the database
-# is created and configured properly, which takes a few
-# seconds after the container is launched
-sleep 12
-
 # Generates a WordPress configuration file
 wp config create --allow-root --path=/var/www/wordpress \
                 --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS \

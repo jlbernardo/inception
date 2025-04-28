@@ -33,6 +33,9 @@ USE mysql;
 # Flushes privileges to ensure changes take effect
 FLUSH PRIVILEGES;
 
+# Deletes the database test, if it exists
+DROP DATABASE IF EXISTS test;
+
 # Deletes the database, if it exists
 DROP DATABASE IF EXISTS ${DB_NAME};
 
@@ -40,6 +43,9 @@ DROP DATABASE IF EXISTS ${DB_NAME};
 DELETE FROM mysql.user WHERE User='${DB_USER}';
 
 # Deletes entries related to the test database from "mysql.db" table
+DELETE FROM mysql.db WHERE Db='test';
+
+# Deletes entries related to our database from "mysql.db" table
 DELETE FROM mysql.db WHERE Db='${DB_NAME}';
 
 # Deletes root users with hosts other than the specified ones
