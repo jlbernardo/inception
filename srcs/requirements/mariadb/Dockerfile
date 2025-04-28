@@ -1,5 +1,5 @@
 # Determines the OS image to build upon
-FROM alpine:3.20
+FROM alpine:3.20.6
 
 # Environment variables to be imported from .env and used inside the container
 # ARG is used when the variables will be used when building the image, but not after it starts
@@ -7,6 +7,7 @@ FROM alpine:3.20
 ARG DB_NAME
 ARG DB_USER
 ARG DB_PASS
+ARG DB_ROOT
 
 # Installs MariaDB and MariaDB-client without saving the sources in cache
 # The client allows you to interact with a MariaDB database server and
@@ -36,18 +37,18 @@ RUN mysql_install_db --user=mysql --datadir=/var/lib/mysql
 # Exposes port 3306, the standard port for MySQL
 EXPOSE 3306
 
+# Copies the file "create_db.sh" from the host to the container
+COPY requirements/mariadb/tools/create_db.sh .
+
+# Changes the permissions of the file "create_db.sh" to make it executable
+RUN chmod +x create_db.sh
+
 # Sets the default user within the container to "mysql"
 USER mysql
 
-# Copies the file "create_db.sh" from the host to the container
-COPY requirements/mariadb/conf/create_db.sh .
+# Executes the script "create_db.sh" to create the database and user
+RUN sh -f create_db.sh
 
-RUN chmod +x create_db.sh; ash -f create_db.sh
-
-# Defines the executable and the parameters to be run when the container starts
-#ENTRYPOINT ["sh", "create_db.sh"]
-
-# Specifies the default command to be executed if no arguments are provided when
-# running the container. It starts the MySQL server process and skips the log errors
+# Sets the entrypoint to "mariadbd-safe", which is a wrapper
+# script that allows it to recover from crashes and other issues
 ENTRYPOINT ["mariadbd-safe"]
-#ENTRYPOINT ["sleep", "infinity"]

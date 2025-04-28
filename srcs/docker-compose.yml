@@ -3,16 +3,16 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: requirements/nginx/Dockerfile
+      dockerfile: ./requirements/nginx/Dockerfile
+    image: nginx
     container_name: nginx
     ports:
-      - "8443:443"
+      - "443:443"
     depends_on:
       - wordpress
     volumes:
       - wp-volume:/var/www/wordpress
       - ./requirements/nginx/conf/:/etc/nginx/http.d/
-      - ./requirements/nginx/tools:/etc/nginx/ssl/
     restart: always
     networks:
       - inception
@@ -20,12 +20,13 @@ services:
   mariadb:
     build:
       context: .
-      dockerfile: requirements/mariadb/Dockerfile
+      dockerfile: ./requirements/mariadb/Dockerfile
       args:
         - DB_NAME
         - DB_USER
         - DB_PASS
         - DB_ROOT
+    image: mariadb
     container_name: mariadb
     env_file:
       - .env
@@ -34,22 +35,36 @@ services:
     restart: always
     networks:
       - inception
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   wordpress:
     build:
       context: .
-      dockerfile: requirements/wordpress/Dockerfile
+      dockerfile: ./requirements/wordpress/Dockerfile
       args:
         - DB_NAME
         - DB_USER
         - DB_PASS
+        - WP_ADMIN_USER
+        - WP_ADMIN_PSWD
+        - WP_ADMIN_MAIL
+        - WP_USER
+        - WP_USER_MAIL
+        - WP_USER_PSWD
+    image: wordpress
     container_name: wordpress
     env_file:
       - .env
     volumes:
       - wp-volume:/var/www/wordpress
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     restart: always
     networks:
       - inception
@@ -57,16 +72,19 @@ services:
 networks:
     inception:
         driver: bridge
+        name: inception
 
 volumes:
   wp-volume:
+    name: wp-volume
     driver_opts:
       o: bind
       type: none
-      device: /nfs/homes/julberna/goinfre/data/wordpress
+      device: /home/julberna/data/wordpress
 
   db-volume:
+    name: db-volume
     driver_opts:
       o: bind
       type: none
-      device: /nfs/homes/julberna/goinfre/data/mariadb
+      device: /home/julberna/data/mariadb

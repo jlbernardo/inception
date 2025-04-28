@@ -33,13 +33,14 @@ USE mysql;
 # Flushes privileges to ensure changes take effect
 FLUSH PRIVILEGES;
 
-DROP DATABASE test;
+# Deletes the database, if it exists
+DROP DATABASE IF EXISTS ${DB_NAME};
 
 # Deletes users with empty usernames
-DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='${DB_USER}';
 
 # Deletes entries related to the test database from "mysql.db" table
-DELETE FROM mysql.db WHERE Db='test';
+DELETE FROM mysql.db WHERE Db='${DB_NAME}';
 
 # Deletes root users with hosts other than the specified ones
 DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
